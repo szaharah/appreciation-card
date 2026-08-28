@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>to the team that made it possible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1628;
+    --ink2:#0F2547;
+    --blue:#1565C0;
+    --blue2:#2979FF;
+    --sky:#90CAF9;
+    --gold:#F9A825;
+    --gold2:#FFF8E1;
+    --paper:#F4F8FF;
+    --muted:rgba(144,202,249,0.45);
+    --line:rgba(144,202,249,0.2);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; -webkit-text-size-adjust:100%; }
+  body{ margin:0; font-family:'DM Sans',sans-serif; background:var(--ink); color:var(--paper); overflow:hidden; }
+  .serif{ font-family:'DM Serif Display',serif; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+
+  /* GRID BG */
+  #gridBg{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.055; }
+  #gridBg line{ stroke:#90CAF9; stroke-width:1; }
+
+  /* CAT PARTICLES */
+  #particles{ position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .pt{ position:absolute; bottom:-40px; opacity:0; animation:ptRise linear infinite; }
+  @keyframes ptRise{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.75; } 90%{ opacity:0.4; }
+    100%{ transform:translateY(-110vh) translateX(var(--dx,10px)) rotate(var(--dr,180deg)); opacity:0; }
+  }
+
+  /* SWEEP */
+  #sweep{ position:fixed; inset:0; background:linear-gradient(135deg,var(--blue),var(--ink2)); z-index:80; clip-path:circle(0% at 50% 50%); pointer-events:none; }
+  #sweep.go{ animation:swIn .8s cubic-bezier(.6,0,.4,1) forwards, swOut .8s cubic-bezier(.6,0,.4,1) .75s forwards; }
+  @keyframes swIn{ to{ clip-path:circle(150% at 50% 50%); } }
+  @keyframes swOut{ to{ clip-path:circle(0% at 50% 50%); } }
+
+  /* COVER */
+  #cover{
+    position:fixed; inset:0; z-index:20;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px; text-align:center;
+    background:radial-gradient(ellipse at 25% 25%, rgba(41,121,255,0.18) 0, transparent 52%),
+               radial-gradient(ellipse at 80% 75%, rgba(249,168,37,0.1) 0, transparent 45%),
+               var(--ink);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  #cover.out{ opacity:0; transform:scale(1.04); pointer-events:none; }
+  #cover.gone{ display:none; }
+
+  .cover-tag{ font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--sky); border:1px solid var(--line); padding:6px 16px; border-radius:20px; margin-bottom:24px; background:rgba(144,202,249,0.06); }
+  .cover-h{ font-family:'DM Serif Display',serif; font-size:clamp(38px,10vw,68px); line-height:1.08; margin:0 0 12px; background:linear-gradient(135deg,var(--paper) 20%,var(--sky) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .cover-sub{ font-size:13px; color:var(--sky); letter-spacing:1px; text-transform:uppercase; margin:0 0 36px; }
+
+  @keyframes hb{ 0%,100%{ transform:scale(1); } 14%{ transform:scale(1.1); } 28%{ transform:scale(1); } 42%{ transform:scale(1.06); } 56%{ transform:scale(1); } }
+  .open-btn{ border:1px solid var(--blue2); background:rgba(41,121,255,0.1); color:var(--paper); font-family:'DM Sans',sans-serif; font-weight:600; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; padding:14px 34px; border-radius:4px; cursor:pointer; animation:hb 2s ease-in-out infinite; transition:background .2s; }
+  .open-btn:hover{ background:rgba(41,121,255,0.26); }
+
+  /* DOTS */
+  .dots{ position:fixed; left:14px; top:50%; transform:translateY(-50%); z-index:40; display:flex; flex-direction:column; gap:8px; }
+  .dots span{ width:5px; height:5px; border-radius:50%; background:var(--line); cursor:pointer; transition:background .3s, transform .3s; }
+  .dots span.on{ background:var(--gold); transform:scale(1.6); }
+
+  /* PAGER */
+  #pager{ display:none; position:fixed; inset:0; z-index:2; overflow:hidden; }
+  #pager.on{ display:block; }
+
+  .page{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px 86px; text-align:center; opacity:0; visibility:hidden; touch-action:none; user-select:none; z-index:1; }
+  .page.on{ opacity:1; visibility:visible; pointer-events:auto; z-index:2; }
+  .pc{ max-width:480px; width:100%; }
+  .pc button,.pc input,.pc textarea{ touch-action:auto; user-select:auto; }
+  .ey{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--sky); margin:0 0 14px; }
+
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes zoomIn{ 0%{ opacity:0; transform:scale(.55) rotate(-6deg); } 65%{ transform:scale(1.06) rotate(2deg); } 100%{ opacity:1; transform:scale(1) rotate(0); } }
+  @keyframes fromLeft{ from{ opacity:0; transform:translateX(-32px); } to{ opacity:1; transform:translateX(0); } }
+  @keyframes fromRight{ from{ opacity:0; transform:translateX(32px); } to{ opacity:1; transform:translateX(0); } }
+  @keyframes popUp{ 0%{ opacity:0; transform:scale(.3); } 70%{ transform:scale(1.1); } 100%{ opacity:1; transform:scale(1); } }
+
+  .pc{ opacity:0; }
+  .iv .pc{ animation:fadeUp .6s cubic-bezier(.22,.61,.36,1) forwards; }
+
+  /* ── PAGE 1: OPENING TRIBUTE ── */
+  .p1{ background:var(--ink); }
+  .tribute-quote{ font-family:'DM Serif Display',serif; font-style:italic; font-size:clamp(22px,5.5vw,30px); line-height:1.5; margin:0 0 24px; color:var(--paper); opacity:0; }
+  .iv .tribute-quote{ animation:fadeUp .7s ease forwards; }
+  .tribute-attr{ font-size:13px; color:var(--sky); opacity:0; }
+  .iv .tribute-attr{ animation:fadeUp .5s ease forwards; animation-delay:.5s; }
+  .tribute-line{ width:48px; height:3px; background:var(--gold); margin:18px auto; border-radius:2px; opacity:0; }
+  .iv .tribute-line{ animation:popUp .5s ease forwards; animation-delay:.25s; }
+
+  /* ── PAGE 2: THE PEOPLE SECTION ── */
+  .p2{ background:var(--ink2); }
+  .people-card{ border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:14px; background:rgba(21,101,192,0.1); text-align:left; opacity:0; }
+  .iv .people-card:nth-child(1){ animation:fromLeft .55s ease forwards; animation-delay:.05s; }
+  .iv .people-card:nth-child(2){ animation:fromLeft .55s ease forwards; animation-delay:.2s; }
+  .iv .people-card:nth-child(3){ animation:fromLeft .55s ease forwards; animation-delay:.35s; }
+  .iv .people-card:nth-child(4){ animation:fromLeft .55s ease forwards; animation-delay:.5s; }
+  .people-role{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
+  .people-msg{ font-size:14px; color:var(--paper); line-height:1.6; margin:0; }
+
+  /* ── PAGE 3: THINGS THEY DID ── */
+  .p3{ background:var(--ink); }
+  .did-item{ display:flex; gap:14px; align-items:flex-start; margin-bottom:18px; opacity:0; text-align:left; }
+  .iv .did-item:nth-child(1){ animation:fromLeft .5s ease forwards; animation-delay:.05s; }
+  .iv .did-item:nth-child(2){ animation:fromLeft .5s ease forwards; animation-delay:.2s; }
+  .iv .did-item:nth-child(3){ animation:fromLeft .5s ease forwards; animation-delay:.35s; }
+  .iv .did-item:nth-child(4){ animation:fromLeft .5s ease forwards; animation-delay:.5s; }
+  .did-icon{ flex:0 0 42px; width:42px; height:42px; border-radius:10px; background:rgba(41,121,255,0.15); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .did-text h4{ font-size:14.5px; font-weight:600; color:var(--paper); margin:0 0 4px; }
+  .did-text p{ font-size:13px; color:rgba(244,248,255,0.7); line-height:1.55; margin:0; }
+
+  /* ── PAGE 4: 2-PHOTO PAGE ── */
+  .p4{ background:var(--ink2); }
+  .photo-big-grid{ display:flex; flex-direction:column; gap:16px; }
+  .photo-big-card{ position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--line); background:linear-gradient(135deg,var(--blue),var(--blue2)); opacity:0; }
+  .iv .photo-big-card:nth-child(1){ animation:fromLeft .6s ease forwards; animation-delay:.1s; }
+  .iv .photo-big-card:nth-child(2){ animation:fromRight .6s ease forwards; animation-delay:.28s; }
+  .photo-big-card img{ width:100%; height:180px; object-fit:cover; display:block; }
+  .photo-big-placeholder{ width:100%; height:180px; display:flex; align-items:center; justify-content:center; font-size:48px; }
+  .photo-big-cap{ padding:12px 14px; font-size:13.5px; color:var(--paper); line-height:1.5; background:rgba(10,22,40,0.6); }
+
+  /* ── PAGE 5: CONNECT THE DOTS GAME ── */
+  .p5{ background:var(--ink); padding:40px 16px 70px; }
+  .p5 .pc{ max-width:100%; }
+  .game-wrap{ position:relative; margin:0 auto; }
+  #gameCanvas{ display:block; margin:0 auto; touch-action:none; border-radius:12px; border:1px solid var(--line); cursor:crosshair; }
+  .game-status{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; color:var(--sky); margin:10px 0 0; min-height:20px; }
+  .game-reset{ margin-top:10px; border:1px solid var(--line); background:rgba(41,121,255,0.1); color:var(--sky); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; padding:8px 20px; border-radius:4px; cursor:pointer; }
+  .game-reset:hover{ background:rgba(41,121,255,0.25); }
+
+  /* ── PAGE 6: MOMENTS THAT MATTERED ── */
+  .p6{ background:var(--ink2); }
+  .moment-wrap{ position:relative; padding-left:22px; text-align:left; }
+  .moment-wrap::before{ content:""; position:absolute; left:6px; top:4px; bottom:4px; width:2px; background:var(--line); transform:scaleY(0); transform-origin:top; transition:transform 1s ease; }
+  .iv .moment-wrap::before{ transform:scaleY(1); }
+  .mom-item{ position:relative; padding-bottom:20px; opacity:0; }
+  .iv .mom-item:nth-child(1){ animation:fromLeft .5s ease forwards; animation-delay:.15s; }
+  .iv .mom-item:nth-child(2){ animation:fromLeft .5s ease forwards; animation-delay:.3s; }
+  .iv .mom-item:nth-child(3){ animation:fromLeft .5s ease forwards; animation-delay:.45s; }
+  .iv .mom-item:nth-child(4){ animation:fromLeft .5s ease forwards; animation-delay:.6s; }
+  .mom-item::before{ content:""; position:absolute; left:-22px; top:5px; width:10px; height:10px; border-radius:50%; background:var(--gold); border:2px solid var(--ink2); }
+  .mom-label{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--gold); margin:0 0 3px; }
+  .mom-text{ font-size:14px; color:var(--paper); line-height:1.55; margin:0; }
+
+  /* ── PAGE 7: LETTER TO THEM ── */
+  .p7{ background:var(--ink); }
+  .letter-box{ border:1px solid var(--line); border-radius:12px; padding:22px 20px; background:rgba(21,101,192,0.08); text-align:left; }
+  .letter-box p{ font-size:14.5px; line-height:1.85; color:rgba(244,248,255,0.88); margin:0 0 14px; opacity:0; }
+  .iv .letter-box p:nth-child(1){ animation:fadeUp .6s ease forwards; animation-delay:.1s; }
+  .iv .letter-box p:nth-child(2){ animation:fadeUp .6s ease forwards; animation-delay:.28s; }
+  .iv .letter-box p:nth-child(3){ animation:fadeUp .6s ease forwards; animation-delay:.46s; }
+  .iv .letter-box p:last-child{ margin:0; }
+  .letter-sign{ font-family:'DM Serif Display',serif; font-size:20px; color:var(--gold); margin-top:16px; opacity:0; }
+  .iv .letter-sign{ animation:fadeUp .5s ease forwards; animation-delay:.65s; }
+
+  /* ── PAGE 8: SONG ── */
+  .p8{ background:var(--ink2); overflow:hidden; }
+  .song-float-wrap{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .song-note{ position:absolute; opacity:0; animation:ptRise linear infinite; font-size:18px; }
+  .p8 .pc{ position:relative; z-index:1; }
+  .disc{ width:148px; height:148px; margin:0 auto 20px; border-radius:50%; background:repeating-radial-gradient(circle,#0d0d0d 0 2px,#181818 2px 4px); display:flex; align-items:center; justify-content:center; box-shadow:0 12px 32px rgba(0,0,0,.55); opacity:0; transform:translateY(-28px) scale(.7); transition:opacity .7s ease, transform .8s cubic-bezier(.34,1.4,.64,1); }
+  .iv .disc{ opacity:1; transform:translateY(0) scale(1); }
+  .disc.spin{ animation:spinD 4s linear infinite; }
+  @keyframes spinD{ to{ transform:rotate(360deg); } }
+  .disc-center{ width:46px; height:46px; border-radius:50%; background:var(--blue2); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; }
+  .s-title{ font-family:'DM Serif Display',serif; font-size:22px; margin:0 0 4px; }
+  .s-artist{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--sky); margin:0 0 12px; }
+  .s-note{ font-size:14px; color:rgba(244,248,255,0.75); font-style:italic; line-height:1.7; }
+
+  /* ── PAGE 9: BIG THANK YOU ── */
+  .p9{ background:var(--ink); }
+  .ty-word{ font-family:'DM Serif Display',serif; font-style:italic; font-size:clamp(60px,16vw,90px); font-weight:400; line-height:1; margin:0 0 12px; opacity:0; background:linear-gradient(135deg,var(--paper) 20%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .iv .ty-word{ animation:zoomIn .75s cubic-bezier(.34,1.5,.64,1) forwards; }
+  .ty-sub{ font-size:14px; color:var(--sky); opacity:0; margin:0 0 20px; }
+  .iv .ty-sub{ animation:fadeUp .5s ease forwards; animation-delay:.4s; }
+  .ty-tags{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .ty-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; border:1px solid var(--line); padding:6px 14px; border-radius:20px; color:var(--sky); opacity:0; background:rgba(144,202,249,0.06); }
+  .iv .ty-tag:nth-child(1){ animation:popUp .4s ease forwards; animation-delay:.6s; }
+  .iv .ty-tag:nth-child(2){ animation:popUp .4s ease forwards; animation-delay:.72s; }
+  .iv .ty-tag:nth-child(3){ animation:popUp .4s ease forwards; animation-delay:.84s; }
+  .iv .ty-tag:nth-child(4){ animation:popUp .4s ease forwards; animation-delay:.96s; }
+  .iv .ty-tag:nth-child(5){ animation:popUp .4s ease forwards; animation-delay:1.08s; }
+
+  /* ── PAGE 10: CLOSING ── */
+  .p10{ background:var(--ink2); overflow:hidden; }
+  .curt{ position:absolute; top:0; bottom:0; width:52%; background:var(--blue); z-index:2; transition:transform 1s cubic-bezier(.6,0,.4,1); }
+  .curt.L{ left:0; transform:translateX(0); }
+  .curt.R{ right:0; transform:translateX(0); }
+  .iv .curt.L{ transform:translateX(-100%); }
+  .iv .curt.R{ transform:translateX(100%); }
+  .close-inner{ position:relative; z-index:1; opacity:0; transition:opacity .6s ease .7s; }
+  .iv .close-inner{ opacity:1; }
+  .close-msg{ font-family:'DM Serif Display',serif; font-size:clamp(28px,8vw,42px); margin:0 0 6px; }
+  .close-from{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--sky); margin:0 0 28px; letter-spacing:1px; }
+  .replay-btn{ border:1px solid rgba(255,255,255,0.2); background:transparent; color:var(--paper); font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:1px; padding:11px 24px; border-radius:4px; cursor:pointer; transition:border-color .2s, background .2s; }
+  .replay-btn:hover{ border-color:var(--gold); background:rgba(249,168,37,0.1); }
+
+  /* MUSIC / SWIPE */
+  .music-btn{ position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom)); width:46px; height:46px; border-radius:50%; border:1px solid var(--blue2); background:rgba(10,22,40,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:40; box-shadow:0 4px 14px rgba(0,0,0,.4); }
+  .music-btn svg{ width:20px; height:20px; animation:spinD 3.5s linear infinite; animation-play-state:paused; }
+  .music-btn.play svg{ animation-play-state:running; }
+
+  #sh{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:40; display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:1px; color:var(--muted); opacity:0; transition:opacity .5s; pointer-events:none; }
+  #sh.on{ opacity:1; }
+  #sh svg{ width:15px; height:15px; animation:nudge 1.5s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{ transform:translateX(0); } 50%{ transform:translateX(5px); } }
+
+  #cc{ position:fixed; inset:0; pointer-events:none; z-index:60; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  @media(max-width:380px){ .cover-h{ font-size:34px; } }
+</style>
+</head>
+<body>
+
+<!--
+  ═══════════════════════════════════════════════
+  CONFIG — only edit this block. nothing else.
+  ═══════════════════════════════════════════════
+-->
+
+<div id="particles"></div>
+<svg id="gridBg" xmlns="http://www.w3.org/2000/svg"></svg>
+<canvas id="cc"></canvas>
+<div id="sweep"></div>
+<audio id="bg" loop preload="auto"></audio>
+
+<button class="music-btn" id="mt" style="display:none;" aria-label="Toggle music">
+  <svg viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="var(--blue2)"/>
+    <circle cx="12" cy="12" r="3.2" fill="var(--ink)"/>
+  </svg>
+</button>
+
+<div id="sh">
+  <span>swipe</span>
+  <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h14M13 6l6 6-6 6" stroke="var(--sky)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<div class="dots" id="dots" style="display:none;"></div>
+
+<!-- COVER -->
+<section id="cover">
+  <h1 class="sr-only">Appreciation card for the IT Department team. Tap to open.</h1>
+  <div class="cover-tag mono">// a message of gratitude</div>
+  <p class="cover-h serif">a small card<br>for a team<br>that did so much</p>
+  <p class="cover-sub mono" id="covSub">IT Department</p>
+  <button class="open-btn" id="openBtn">open this card</button>
+</section>
+
+<!-- PAGES -->
+<div id="pager">
+
+  <!-- 1. OPENING TRIBUTE -->
+  <section class="page p1">
+    <div class="pc">
+      <p class="ey">01 — for you</p>
+      <div class="tribute-line"></div>
+      <p class="tribute-quote serif" id="tq"></p>
+      <p class="tribute-attr mono" id="ta"></p>
+    </div>
+  </section>
+
+  <!-- 2. THE PEOPLE -->
+  <section class="page p2">
+    <div class="pc">
+      <p class="ey">02 — the people behind the scenes</p>
+      <h2 class="serif" style="font-size:26px;margin:0 0 20px;font-weight:400;">every one of you mattered.</h2>
+      <div id="peopleList"></div>
+    </div>
+  </section>
+
+  <!-- 3. WHAT THEY DID -->
+  <section class="page p3">
+    <div class="pc">
+      <p class="ey">03 — what you did for me</p>
+      <h2 class="serif" style="font-size:26px;margin:0 0 22px;font-weight:400;">more than just a guide.</h2>
+      <div id="didList"></div>
+    </div>
+  </section>
+
+  <!-- 4. 2-PHOTO PAGE -->
+  <section class="page p4">
+    <div class="pc">
+      <p class="ey">04 — moments we shared</p>
+      <h2 class="serif" style="font-size:26px;margin:0 0 18px;font-weight:400;">memories worth keeping.</h2>
+      <div class="photo-big-grid" id="photoBigGrid"></div>
+    </div>
+  </section>
+
+  <!-- 5. CONNECT THE DOTS GAME -->
+  <section class="page p5">
+    <div class="pc">
+      <p class="ey">05 — a little something fun</p>
+      <h2 class="serif" style="font-size:22px;margin:0 0 4px;font-weight:400;">connect the dots.</h2>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 12px;font-family:'JetBrains Mono',monospace;">// tap a dot then tap another to connect them</p>
+      <div class="game-wrap">
+        <canvas id="gameCanvas"></canvas>
+        <p class="game-status" id="gameStatus">tap a dot to start</p>
+        <button class="game-reset" id="gameReset">reset ↺</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. MOMENTS THAT MATTERED -->
+  <section class="page p6">
+    <div class="pc">
+      <p class="ey">06 — an honest apology</p>
+      <h2 class="serif" style="font-size:26px;margin:0 0 22px;font-weight:400;">sorry, from the heart.</h2>
+      <div class="moment-wrap" id="momWrap"></div>
+    </div>
+  </section>
+
+  <!-- 7. LETTER TO THEM -->
+  <section class="page p7">
+    <div class="pc">
+      <p class="ey">07 — from my heart</p>
+      <h2 class="serif" style="font-size:26px;margin:0 0 18px;font-weight:400;">dear IT Department,</h2>
+      <div class="letter-box">
+        <div id="letterLines"></div>
+        <p class="letter-sign serif" id="lsign"></p>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- 9. BIG THANK YOU -->
+  <section class="page p9">
+    <div class="pc">
+      <p class="ey">09 — from me to you</p>
+      <p class="ty-word serif">thank<br>you.</p>
+      <p class="ty-sub" id="tySub"></p>
+      <div class="ty-tags" id="tyTags"></div>
+    </div>
+  </section>
+
+  <!-- 10. CLOSING -->
+  <section class="page p10">
+    <div class="curt L"></div>
+    <div class="curt R"></div>
+    <div class="pc close-inner">
+      <p class="close-msg serif" id="closeMsg"></p>
+      <p class="close-from mono" id="closeFrom"></p>
+      <button class="replay-btn" id="replayBtn">replay card</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIG — edit only this block
+   ═══════════════════════════════════════════════ */
+var CONFIG = {
+
+  dept: "IT Department",
+
+  // Page 1 — opening tribute quote
+  tribute: {
+    quote: "Behind every intern who grows is a team that chose to invest their time, patience and knowledge — without being asked to.",
+    attr: "— with gratitude, Your Name"
+  },
+
+  // Page 2 — general appreciation to the whole team (no individual mentions)
+  people: [
+    { role: "// a warm welcome",      msg: "From day one you made me feel like I already belonged. That kind of warmth isn't common, and I didn't take it for granted." },
+    { role: "// patient guidance",    msg: "Every question I asked was met with patience. Every mistake I made was turned into a lesson. That is the mark of a great team." },
+    { role: "// leading by example",  msg: "Watching this team work — the dedication, the collaboration, the professionalism — taught me more than any classroom ever could." },
+    { role: "// lasting impression",  msg: "The time I spent with the IT Department will stay with me for the rest of my career. You set the standard I will always measure others against." }
+  ],
+
+  // Page 3 — specific things they did that helped
+  did: [
+    { icon: "🧭", title: "Guided without micromanaging",    desc: "You pointed me in the right direction and trusted me to get there." },
+    { icon: "🛠️", title: "Let me learn by doing",           desc: "Real tasks, real stakes — and you were always there when I stumbled." },
+    { icon: "💬", title: "Made time to explain",            desc: "No question was too small. That patience changed how I learn." },
+    { icon: "🤝", title: "Treated me as one of your own",   desc: "Not just an intern — a colleague. That made all the difference." }
+  ],
+
+  // Page 4 — 2 big photos. Add src:"assets/images/photo.jpg" for real photos.
+  photos: [
+    { src:"assets/images/image1.jpg", emoji:"📸", caption:"The team that made showing up every day feel easy" },
+    { src:"assets/images/image2.jpg", emoji:"💻", caption:"Deep in troubleshooting mode — together" }
+  ],
+
+  // Page 6 — sincere apology for any mistakes
+  moments: [
+    { label:"if I was slow",       text:"I'm sorry for the times I needed things explained more than once. Your patience never went unnoticed." },
+    { label:"if I made errors",    text:"I'm sorry for any mistakes I made on the job. I learned from every single one, and that is because of how you handled them." },
+    { label:"if I fell short",     text:"I'm sorry if there were moments where I didn't meet the standard. I always tried my best, and I'll keep raising that bar." },
+    { label:"a sincere promise",   text:"I carry every piece of feedback and correction with me as I move forward. Thank you for helping me grow." }
+  ],
+
+  // Page 7 — personal letter to the team
+  letter: [
+    "I came into this internship hoping to learn some technical skills. What I did not expect was to find people who genuinely cared — about the work, about each other, and unexpectedly, about me.",
+    "Every time I was stuck, confused, or doubting myself, someone from this team showed up. Not because they had to, but because that is simply who you are.",
+    "I leave here not just with skills, but with a standard. A standard of how a good team operates, how good people treat others, and what it looks like to be truly excellent at what you do."
+  ],
+  signature: "— Your Name",
+
+
+  // Background song path
+  songSrc: "assets/songs/background_song.mp3",
+
+  // Page 9 — big thank you
+  tyThanks: {
+    sub:  "for the guidance, the patience, and the kindness.",
+    tags: ["for the mentorship", "for the patience", "for the laughs", "for trusting me", "for everything"]
+  },
+
+  // Page 10 — closing
+  closing: {
+    msg:  "until we meet again.",
+    from: "— Your Name, Intern"
+  }
+
+};
+/* ═══════════════════════════════════════════════ */
+
+(function(){
+
+  // Grid
+  var g=document.getElementById('gridBg');
+  g.setAttribute('width',window.innerWidth); g.setAttribute('height',window.innerHeight);
+  var co=Math.floor(window.innerWidth/44), ro=Math.floor(window.innerHeight/44);
+  for(var c=0;c<=co;c++){ var vl=document.createElementNS('http://www.w3.org/2000/svg','line'); vl.setAttribute('x1',c*44); vl.setAttribute('y1',0); vl.setAttribute('x2',c*44); vl.setAttribute('y2',window.innerHeight); g.appendChild(vl); }
+  for(var r=0;r<=ro;r++){ var hl=document.createElementNS('http://www.w3.org/2000/svg','line'); hl.setAttribute('x1',0); hl.setAttribute('y1',r*44); hl.setAttribute('x2',window.innerWidth); hl.setAttribute('y2',r*44); g.appendChild(hl); }
+
+  // Particles
+  // Cat theme particles
+  var pe=document.getElementById('particles');
+  var catColors=['#2979FF','#90CAF9','#F9A825','#64B5F6','#BBDEFB'];
+
+  // cat face SVG
+  var catFace='<svg viewBox="0 0 32 32" width="SIZE" height="SIZE"><circle cx="16" cy="18" r="11" fill="COLOR"/><polygon points="9,10 13,18 5,18" fill="COLOR"/><polygon points="23,10 27,18 19,18" fill="COLOR"/><circle cx="12" cy="19" r="1.8" fill="#0A1628"/><circle cx="20" cy="19" r="1.8" fill="#0A1628"/><ellipse cx="16" cy="22" rx="2" ry="1.2" fill="#F9A825"/><line x1="10" y1="21" x2="4" y2="20" stroke="#0A1628" stroke-width="0.8"/><line x1="10" y1="22" x2="4" y2="22" stroke="#0A1628" stroke-width="0.8"/><line x1="22" y1="21" x2="28" y2="20" stroke="#0A1628" stroke-width="0.8"/><line x1="22" y1="22" x2="28" y2="22" stroke="#0A1628" stroke-width="0.8"/></svg>';
+
+  // paw print SVG
+  var pawPrint='<svg viewBox="0 0 32 32" width="SIZE" height="SIZE"><circle cx="16" cy="20" r="7" fill="COLOR"/><circle cx="10" cy="12" r="3" fill="COLOR"/><circle cx="22" cy="12" r="3" fill="COLOR"/><circle cx="7" cy="18" r="2.5" fill="COLOR"/><circle cx="25" cy="18" r="2.5" fill="COLOR"/></svg>';
+
+  // fish SVG
+  var fish='<svg viewBox="0 0 36 24" width="SIZE" height="SIZE"><ellipse cx="16" cy="12" rx="12" ry="7" fill="COLOR"/><polygon points="28,4 36,12 28,20" fill="COLOR"/><circle cx="8" cy="10" r="1.5" fill="#0A1628"/></svg>';
+
+  // heart
+  var heart='<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><path d="M12 20 C6 15,2 11.5,2 7.6 C2 4.6 4.4 2.5 7.2 2.5 C9 2.5 10.6 3.4 12 5 C13.4 3.4 15 2.5 16.8 2.5 C19.6 2.5 22 4.6 22 7.6 C22 11.5 18 15 12 20 Z" fill="COLOR"/></svg>';
+
+  var shapes=[catFace, catFace, pawPrint, pawPrint, fish, heart];
+  var COUNT=22;
+  for(var pi=0;pi<COUNT;pi++){
+    var s=Math.floor(Math.random()*shapes.length);
+    var sz=16+Math.random()*18;
+    var col=catColors[Math.floor(Math.random()*catColors.length)];
+    var svgStr=shapes[s].replace(/SIZE/g,sz).replace(/COLOR/g,col);
+    var wrap=document.createElement('div');
+    wrap.className='pt';
+    wrap.innerHTML=svgStr;
+    wrap.style.left=(Math.random()*94)+'%';
+    wrap.style.setProperty('--dx',(Math.random()*60-30)+'px');
+    wrap.style.setProperty('--dr',(Math.random()*360)+'deg');
+    wrap.style.animationDuration=(9+Math.random()*10)+'s';
+    wrap.style.animationDelay=(Math.random()*14)+'s';
+    pe.appendChild(wrap);
+  }
+
+  // Populate
+  document.getElementById('covSub').textContent = CONFIG.dept;
+  document.getElementById('tq').textContent = CONFIG.tribute.quote;
+  document.getElementById('ta').textContent = CONFIG.tribute.attr;
+
+  var pl=document.getElementById('peopleList');
+  CONFIG.people.forEach(function(p){ var d=document.createElement('div'); d.className='people-card'; d.innerHTML='<div class="people-role mono">'+p.role+'</div><p class="people-msg">'+p.msg+'</p>'; pl.appendChild(d); });
+
+  var dl=document.getElementById('didList');
+  CONFIG.did.forEach(function(d){ var el=document.createElement('div'); el.className='did-item'; el.innerHTML='<div class="did-icon">'+d.icon+'</div><div class="did-text"><h4>'+d.title+'</h4><p>'+d.desc+'</p></div>'; dl.appendChild(el); });
+
+  // 2-photo page
+  var pbg=document.getElementById('photoBigGrid');
+  CONFIG.photos.forEach(function(p){
+    var card=document.createElement('div'); card.className='photo-big-card';
+    var media=p.src?'<img src="'+p.src+'" alt="">':'<div class="photo-big-placeholder">'+p.emoji+'</div>';
+    card.innerHTML=media+'<div class="photo-big-cap">'+p.caption+'</div>';
+    pbg.appendChild(card);
+  });
+
+  // Connect the dots game
+  var canvas=document.getElementById('gameCanvas');
+  var gctx=canvas.getContext('2d');
+  var SIZE=Math.min(window.innerWidth-48, 320);
+  canvas.width=SIZE; canvas.height=SIZE;
+
+  var WORDS=['THANK','YOU','IT','TEAM'];
+  var allDots=[], lines=[], selected=null, completed=false;
+  var wordColors=['#2979FF','#F9A825','#90CAF9','#52B788'];
+
+  function buildDots(){
+    allDots=[]; lines=[]; selected=null; completed=false;
+    var pad=28, cols=5, rows=4;
+    var gw=SIZE-pad*2, gh=SIZE-pad*2;
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        allDots.push({ x:pad+c*(gw/(cols-1)), y:pad+r*(gh/(rows-1)), id:r*cols+c, connected:false, label:WORDS[r]?WORDS[r][c]||'':'' });
+      }
+    }
+  }
+
+  function drawGame(){
+    gctx.clearRect(0,0,SIZE,SIZE);
+    gctx.strokeStyle='rgba(144,202,249,0.08)'; gctx.lineWidth=1;
+    for(var xi=0;xi<5;xi++){ gctx.beginPath(); gctx.moveTo(28+xi*((SIZE-56)/4),0); gctx.lineTo(28+xi*((SIZE-56)/4),SIZE); gctx.stroke(); }
+    for(var yi=0;yi<4;yi++){ gctx.beginPath(); gctx.moveTo(0,28+yi*((SIZE-56)/3)); gctx.lineTo(SIZE,28+yi*((SIZE-56)/3)); gctx.stroke(); }
+    lines.forEach(function(l){
+      var a=allDots[l.a], b=allDots[l.b];
+      gctx.beginPath(); gctx.moveTo(a.x,a.y); gctx.lineTo(b.x,b.y);
+      gctx.strokeStyle=l.color; gctx.lineWidth=3; gctx.lineCap='round'; gctx.stroke();
+    });
+    allDots.forEach(function(d,i){
+      var row=Math.floor(i/5), isSelected=selected&&selected.id===d.id;
+      gctx.beginPath(); gctx.arc(d.x,d.y,isSelected?11:8,0,Math.PI*2);
+      gctx.fillStyle=d.connected?wordColors[row]:(isSelected?'#fff':'rgba(144,202,249,0.35)');
+      gctx.fill(); gctx.strokeStyle=isSelected?'#fff':wordColors[row]; gctx.lineWidth=2; gctx.stroke();
+      if(d.label){ gctx.fillStyle=d.connected||isSelected?'#0A1628':'var(--paper)'; gctx.font='bold '+(isSelected?'11':'10')+'px JetBrains Mono,monospace'; gctx.textAlign='center'; gctx.textBaseline='middle'; gctx.fillText(d.label,d.x,d.y); }
+    });
+    if(completed){
+      gctx.fillStyle='rgba(10,22,40,0.72)'; gctx.fillRect(0,0,SIZE,SIZE);
+      gctx.font='bold 22px DM Serif Display,serif'; gctx.fillStyle='#F9A825'; gctx.textAlign='center'; gctx.textBaseline='middle'; gctx.fillText('THANK YOU! ✦',SIZE/2,SIZE/2-14);
+      gctx.font='13px JetBrains Mono,monospace'; gctx.fillStyle='#90CAF9'; gctx.fillText('all dots connected!',SIZE/2,SIZE/2+18);
+    }
+  }
+
+  function getDotAt(x,y){ var hit=null, best=999; allDots.forEach(function(d){ var dist=Math.hypot(d.x-x,d.y-y); if(dist<22&&dist<best){ best=dist; hit=d; } }); return hit; }
+
+  function tapDot(x,y){
+    if(completed) return;
+    var d=getDotAt(x,y);
+    if(!d){ selected=null; drawGame(); return; }
+    if(!selected){ selected=d; drawGame(); document.getElementById('gameStatus').textContent='now tap another dot to connect'; return; }
+    if(selected.id===d.id){ selected=null; drawGame(); return; }
+    var row1=Math.floor(selected.id/5), row2=Math.floor(d.id/5);
+    lines.push({a:selected.id, b:d.id, color:wordColors[Math.min(row1,row2)]});
+    selected.connected=true; d.connected=true; selected=d;
+    if(allDots.every(function(dot){ return dot.connected; })){ completed=true; document.getElementById('gameStatus').textContent=''; }
+    else{ document.getElementById('gameStatus').textContent='keep going! '+lines.length+' connections made'; }
+    drawGame();
+  }
+
+  function getCanvasPos(e){ var rect=canvas.getBoundingClientRect(), sx=canvas.width/rect.width, sy=canvas.height/rect.height, cx2=e.touches?e.touches[0].clientX:e.clientX, cy2=e.touches?e.touches[0].clientY:e.clientY; return {x:(cx2-rect.left)*sx, y:(cy2-rect.top)*sy}; }
+
+  canvas.addEventListener('pointerdown',function(e){ e.stopPropagation(); var p=getCanvasPos(e); tapDot(p.x,p.y); });
+  document.getElementById('gameReset').addEventListener('click',function(e){ e.stopPropagation(); buildDots(); document.getElementById('gameStatus').textContent='tap a dot to start'; drawGame(); });
+
+  buildDots(); drawGame();
+
+  var mw=document.getElementById('momWrap');
+  CONFIG.moments.forEach(function(m){ var item=document.createElement('div'); item.className='mom-item'; item.innerHTML='<div class="mom-label mono">'+m.label+'</div><div class="mom-text">'+m.text+'</div>'; mw.appendChild(item); });
+
+  var ll=document.getElementById('letterLines');
+  CONFIG.letter.forEach(function(p){ var el=document.createElement('p'); el.textContent=p; ll.appendChild(el); });
+  document.getElementById('lsign').textContent = CONFIG.signature;
+
+  document.getElementById('sTitle').textContent = CONFIG.song.title;
+  document.getElementById('sArtist').textContent = CONFIG.song.artist;
+  document.getElementById('sNote').textContent = CONFIG.song.note;
+
+  // Song floating notes
+  var sfw=document.getElementById('songFW');
+  var ns2=['♩','♪','♫','♬','★','✦'];
+  for(var ni=0;ni<22;ni++){ var nd=document.createElement('div'); nd.className='song-note'; var nsize=14+Math.random()*16; nd.style.cssText='font-size:'+nsize+'px;color:'+(Math.random()<0.5?'rgba(41,121,255,0.35)':'rgba(249,168,37,0.28)')+';left:'+(Math.random()*94)+'%;bottom:-30px;animation-duration:'+(7+Math.random()*8)+'s;animation-delay:'+(Math.random()*10)+'s;'; nd.style.setProperty('--dx',(Math.random()*60-30)+'px'); nd.textContent=ns2[Math.floor(Math.random()*ns2.length)]; sfw.appendChild(nd); }
+
+  document.getElementById('tySub').textContent = CONFIG.tyThanks.sub;
+  var tt=document.getElementById('tyTags');
+  CONFIG.tyThanks.tags.forEach(function(t){ var span=document.createElement('span'); span.className='ty-tag mono'; span.textContent='// '+t; tt.appendChild(span); });
+
+  document.getElementById('closeMsg').textContent = CONFIG.closing.msg;
+  document.getElementById('closeFrom').textContent = CONFIG.closing.from;
+
+  // Audio
+  var bgA=document.getElementById('bg');
+  if(CONFIG.songSrc){ var as=document.createElement('source'); as.src=CONFIG.songSrc; as.type='audio/mpeg'; bgA.appendChild(as); }
+  var musicOn=false, mt=document.getElementById('mt');
+  bgA.addEventListener('play',function(){ mt.classList.add('play'); document.getElementById('disc').classList.add('spin'); });
+  bgA.addEventListener('pause',function(){ mt.classList.remove('play'); document.getElementById('disc').classList.remove('spin'); });
+  mt.addEventListener('click',function(){ musicOn=!musicOn; if(musicOn){ bgA.play().catch(function(){}); }else{ bgA.pause(); } });
+
+  // Pager
+  var pages=Array.prototype.slice.call(document.querySelectorAll('#pager .page')), cur=-1;
+  var dotsEl=document.getElementById('dots');
+  pages.forEach(function(){ var d=document.createElement('span'); dotsEl.appendChild(d); });
+  var dotSpans=dotsEl.querySelectorAll('span');
+  dotSpans.forEach(function(d,i){ d.addEventListener('click',function(){ go(i); }); });
+
+  var shEl=document.getElementById('sh'), shDone=false;
+  function hideHint(){ if(shDone) return; shDone=true; shEl.classList.remove('on'); }
+
+  function showP(idx){
+    if(idx<0||idx>=pages.length||idx===cur) return;
+    var out=cur>=0?pages[cur]:null;
+    if(out){ out.style.transition='opacity .35s ease'; out.style.opacity='0'; (function(el){ setTimeout(function(){ el.classList.remove('on','iv'); el.style.visibility='hidden'; el.style.pointerEvents='none'; },350); })(out); }
+    var inc=pages[idx]; inc.style.transition='none'; inc.style.visibility='visible'; inc.style.pointerEvents='auto'; inc.style.opacity='0'; void inc.offsetWidth;
+    requestAnimationFrame(function(){ inc.classList.add('on'); inc.style.transition='opacity .45s ease'; inc.style.opacity='1'; });
+    setTimeout(function(){ inc.classList.add('iv'); },200);
+    cur=idx; dotSpans.forEach(function(d,i){ d.classList.toggle('on',i===idx); }); hideHint();
+  }
+
+  function go(i){ if(i>=0&&i<pages.length) showP(i); }
+
+  // Drag
+  var drag=false, dTarget=null, dStartX=0, pagerEl=document.getElementById('pager');
+  function excl(t){ return !!(t.closest&&(t.closest('.flip-card')||t.closest('.replay-btn'))); }
+  pagerEl.addEventListener('pointerdown',function(e){ if(excl(e.target)) return; var ap=pages[cur]; if(!ap) return; dTarget=ap; dStartX=e.clientX; drag=true; dTarget.style.transition='none'; });
+  window.addEventListener('pointermove',function(e){ if(!drag||!dTarget) return; var dx=e.clientX-dStartX, pull=Math.min(Math.abs(dx)/260,1); dTarget.style.transform='translateX('+(dx*0.25)+'px)'; dTarget.style.opacity=String(1-pull*0.35); });
+  window.addEventListener('pointerup',function(e){ if(!drag||!dTarget) return; drag=false; var dx=e.clientX-dStartX, tgt=dTarget; dTarget=null; var dir=dx<0?1:-1, can=(cur+dir>=0&&cur+dir<pages.length); if(Math.abs(dx)>70&&can){ tgt.style.transition=''; tgt.style.transform=''; go(cur+dir); }else{ tgt.style.transition='transform .3s cubic-bezier(.34,1.5,.64,1),opacity .3s ease'; tgt.style.transform='translateX(0)'; tgt.style.opacity='1'; } });
+  document.addEventListener('keydown',function(e){ if(!pagerEl.classList.contains('on')) return; if(e.key==='ArrowRight') go(cur+1); if(e.key==='ArrowLeft') go(cur-1); });
+
+  // Open
+  var cover=document.getElementById('cover'), sweep=document.getElementById('sweep'), pager=document.getElementById('pager');
+  document.getElementById('openBtn').addEventListener('click',function(){
+    cover.classList.add('out'); sweep.classList.add('go');
+    setTimeout(function(){ cover.classList.add('gone'); pager.classList.add('on'); mt.style.display='flex'; dotsEl.style.display='flex'; shEl.classList.add('on'); showP(0); musicOn=true; bgA.play().catch(function(){}); },750);
+  });
+  document.getElementById('replayBtn').addEventListener('click',function(){ window.location.reload(); });
+
+  // Confetti
+  var cc2=document.getElementById('cc'), cx=cc2.getContext('2d'), cps=[];
+  var cCol=['#2979FF','#90CAF9','#F9A825','#1565C0','#F4F8FF'];
+  function resCC(){ cc2.width=window.innerWidth; cc2.height=window.innerHeight; }
+  window.addEventListener('resize',resCC); resCC();
+  function tickC(){ cx.clearRect(0,0,cc2.width,cc2.height); cps.forEach(function(p){ p.vy+=0.15; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life++; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot*Math.PI/180); cx.fillStyle=p.color; cx.fillRect(-p.size/2,-p.size/2,p.size,p.size); cx.restore(); }); cps=cps.filter(function(p){ return p.y<cc2.height+30&&p.life<260; }); requestAnimationFrame(tickC); }
+  requestAnimationFrame(tickC);
+
+})();
+</script>
+
+</body>
+</html>
